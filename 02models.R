@@ -1,4 +1,4 @@
-##cfas/sems with lavaan here
+##cfas/sems with additional latent variable
 
 #load libraries
 library(semTools) #load lavaan & other tools
@@ -10,22 +10,20 @@ library(semPlot) #for plots
 #bene : benefit/beneficio percibido respecto a gm foods
 #trus : trust/confianza en gm food developers/scientists/regulators
 #cona : conative/intenciones conductuales respecto a gm foods (willingness to buy)
+#gtru : general trust in institutions (not specified as gm foods)
 
 #cfa que tendría que haber hecho siegrist (1999,2000,etc) (cfa - "el malo")
-#es la base para la "cadena causal"
-#5 factores oblicuos
-#df=160
+#df=284
 siegr01 <- '
 acce =~ acce01r + acce02r + acce03d + acce04d
 risk =~ risk01r + risk02r + risk03i + risk04i
 bene =~ bene01d + bene02r + bene03r + bene04d
 trus =~ trus01r + trus02r + trus03d + trus04d
-cona =~ cona01r + cona02r + cona03d + cona04d'
+cona =~ cona01r + cona02r + cona03d + cona04d
+gtru =~ tru1 + tru2 + tru3 + tru4 + tru5 + tru6'
 
 #sem que tendría que haber hecho siegrist (1999,2000,etc) (sem - "el malo")
-#es la "cadena causal"
-#5 factores oblicuos
-#df=165
+#df=293
 siegr02 <- '
 acce =~ acce01r + acce02r + acce03d + acce04d
 risk =~ risk01r + risk02r + risk03i + risk04i
@@ -35,25 +33,22 @@ cona =~ cona01r + cona02r + cona03d + cona04d
 cona ~ acce
 acce ~ risk + bene
 risk ~ trus
-bene ~ trus'
+bene ~ trus
+gtru =~ tru1 + tru2 + tru3 + tru4 + tru5 + tru6'
 
 #cfa que podría haber utilizado eiser et al (2002, etc) (cfa - "el feo")
-#5 factores de primer orden que cargan en un factor de segundo orden
-#corresponde a una interpretación de la "perspectiva asociacionista" sobre las actitudes
-#es conceptualmente diferente, pero estadísticamente equivalente a elgue01
-#df=165
+#df=293
 eiser01 <- '
 acce =~ acce01r + acce02r + acce03d + acce04d
 risk =~ risk01r + risk02r + risk03i + risk04i
 bene =~ bene01d + bene02r + bene03r + bene04d
 trus =~ trus01r + trus02r + trus03d + trus04d
 cona =~ cona01r + cona02r + cona03d + cona04d
-atti =~ acce + risk + bene + trus + cona'
+atti =~ acce + risk + bene + trus + cona
+gtru =~ tru1 + tru2 + tru3 + tru4 + tru5 + tru6'
 
 #cfa bifactor que podría haber utilizado eiser et al (2002, etc) (cfa - "el feo", otra versión)
-#modelo bifactorial con 5 factores oblicuos y un factor general ortogonal
-#corresponde a una interpretación de la "perspectiva asociacionista" sobre las actitudes
-#df=156
+#df=284
 eiser02 <- '
 acce =~ acce01r + acce02r + acce03d + acce04d
 risk =~ risk01r + risk02r + risk03i + risk04i
@@ -61,10 +56,10 @@ bene =~ bene01d + bene02r + bene03r + bene04d
 trus =~ trus01r + trus02r + trus03d + trus04d
 cona =~ cona01r + cona02r + cona03d + cona04d
 atti =~ acce01r + acce02r + acce03d + acce04d +
-        risk01r + risk02r + risk03i + risk04i +
-        bene01d + bene02r + bene03r + bene04d +
-        trus01r + trus02r + trus03d + trus04d +
-        cona01r + cona02r + cona03d + cona04d
+risk01r + risk02r + risk03i + risk04i +
+bene01d + bene02r + bene03r + bene04d +
+trus01r + trus02r + trus03d + trus04d +
+cona01r + cona02r + cona03d + cona04d
 atti ~~ 0*acce
 atti ~~ 0*risk
 atti ~~ 0*bene
@@ -85,34 +80,37 @@ acce ~~ 1*acce
 risk ~~ 1*risk
 bene ~~ 1*bene
 cona ~~ 1*cona
-trus ~~ 1*trus'
+trus ~~ 1*trus
+gtru =~ tru1 + tru2 + tru3 + tru4 + tru5 + tru6
+gtru ~~ 0*acce
+gtru ~~ 0*risk
+gtru ~~ 0*bene
+gtru ~~ 0*cona
+gtru ~~ 0*trus
+'
 
 #cfa inspirado por slovic (1993, 2002 etc) (cfa - "el bueno")
-# 4 factores de primer orden cargan en un factor de segundo orden, además hay un factor oblicuo adicional de primer orden
-#corresponde a mi interpretación del "heurístico afectivo" y el propuesto rol de la "confianza"
-#es conceptualmente diferente al resto, pero es estadísticamente equivalente a eiser01
-#df=165
+#df=292
 elgue01 <- '
 acce =~ acce01r + acce02r + acce03d + acce04d
 risk =~ risk01r + risk02r + risk03i + risk04i
 bene =~ bene01d + bene02r + bene03r + bene04d
 cona =~ cona01r + cona02r + cona03d + cona04d
 atti =~ acce + risk + bene + cona
-trus =~ trus01r + trus02r + trus03d + trus04d'
+trus =~ trus01r + trus02r + trus03d + trus04d
+gtru =~ tru1 + tru2 + tru3 + tru4 + tru5 + tru6'
 
 #cfa bifactor inspirado por slovic (1993, 2002 etc) (cfa - "el bueno", otra versión)
-# 4 factores oblicuos, 1 factor general; además hay 1 factor oblicuo adicional
-#corresponde a mi interpretación del "heurístico afectivo" y el propuesto rol de la "confianza"
-#df=154
+#df=281
 elgue02 <- '
 acce =~ acce01r + acce02r + acce03d + acce04d
 risk =~ risk01r + risk02r + risk03i + risk04i
 bene =~ bene01d + bene02r + bene03r + bene04d
 cona =~ cona01r + cona02r + cona03d + cona04d
 atti =~ acce01r + acce02r + acce03d + acce04d +
-        risk01r + risk02r + risk03i + risk04i +
-        bene01d + bene02r + bene03r + bene04d +
-        cona01r + cona02r + cona03d + cona04d
+risk01r + risk02r + risk03i + risk04i +
+bene01d + bene02r + bene03r + bene04d +
+cona01r + cona02r + cona03d + cona04d
 trus =~ trus01r + trus02r + trus03d + trus04d
 atti ~~ 0*acce
 atti ~~ 0*risk
@@ -128,7 +126,12 @@ atti ~~ 1*atti
 acce ~~ 1*acce
 risk ~~ 1*risk
 bene ~~ 1*bene
-cona ~~ 1*cona'
+cona ~~ 1*cona
+gtru =~ tru1 + tru2 + tru3 + tru4 + tru5 + tru6
+gtru ~~ 0*acce
+gtru ~~ 0*risk
+gtru ~~ 0*bene
+gtru ~~ 0*cona'
 
 #run models with MLR; datos originales "numericos"
 fitsiegr01 <- cfa(siegr01, data=datosrec,estimator="MLR");
@@ -198,12 +201,15 @@ semPaths(fitelgue02)
 
 
 #compare models from same "theory"
-anova(fitsiegr01,fitsiegr02) #with MLR siegr02 is "better"; with ULSMV siegr02 is "better" (these latter three have same dfs)
-anova(fiteiser01,fiteiser02) #with MLR eiser02 is "better"; with ULSMV eiser01 is "better" (these latter three have same dfs)
-anova(fitelgue01,fitelgue02) #with MLR elgue02 is "better"; with ULSMV elgue01 is "better" (these latter three have same dfs)
+anova(fitsiegr01,fitsiegr02) #with MLR siegr02 is "better"; with ULSMV siegr02 is "better"  
+anova(fiteiser01,fiteiser02) #with MLR eiser02 is "better"; with ULSMV eiser01 is "better"  
+anova(fitelgue01,fitelgue02) #with MLR elgue02 is "better"; with ULSMV elgue01 is "better"  
 
-#compare models with same dfs, runs only with ML(R) 
-cat("AIC=",AIC(fitsiegr02),"BIC=",BIC(fitsiegr02))
-cat("AIC=",AIC(fiteiser02),"BIC=",BIC(fiteiser02))
-cat("AIC=",AIC(fitelgue02),"BIC=",BIC(fitelgue02))
+#compare chosen models with different dfs
+anova(fitsiegr02,fitelgue01) #with MLR elgue01 is "better"; with ULSMV siegr02 is "better"
+anova(fiteiser01,fitelgue01) #with MLR eiser01 is "better"; with ULSMV eiser01 is "better"
 
+#compare models with same df, runs only with ML(R) 
+cat("AIC=",AIC(fitsiegr02),"BIC=",BIC(fitsiegr02)) #siegrist has the larger BIC
+cat("AIC=",AIC(fiteiser01),"BIC=",BIC(fiteiser01)) #eiser has the smaller BIC
+cat("AIC=",AIC(fitelgue01),"BIC=",BIC(fitelgue01)) #elgueta has intermediate BIC
